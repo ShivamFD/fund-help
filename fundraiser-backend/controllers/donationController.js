@@ -195,6 +195,7 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Payment = require("../models/Payment");
+const Donation = require('../models/Donation')
 const Fundraiser = require("../models/Fundraiser");
 
 // Initialize Razorpay
@@ -359,3 +360,38 @@ exports.getAllDonations = async (req, res) => {
     res.status(500).json({ message: "Server error fetching donations." });
   }
 };
+
+
+// Get total donation amount
+exports.getTotalDonations = async (req, res) => {
+  try {
+    const total = await Payment.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" }
+        }
+      }
+    ]);
+
+    res.status(200).json({ totalDonations: total[0]?.totalAmount || 0 });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching total donations", error });
+  }
+};
+
+// Get top donation
+exports.getTopDonation = async (req, res) => {
+  try {
+    const topDonation = await Payment.findOne().sort({ amount: -1 }).populate("donor");
+
+    if (!topDonation) {
+      return res.status(404).json({ message: "No donations found" });
+    }
+
+    res.status(200).json({ topDonation });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching top donation", error });
+  }
+};
+

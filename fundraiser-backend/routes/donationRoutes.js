@@ -23,6 +23,7 @@ const {
   verifyPayment,
   getMyDonations,
   getAllDonations,
+  getTotalDonations, getTopDonation
 } = require("../controllers/donationController");
 const { adminProtect } = require("../middleware/authMiddleware");
 
@@ -39,5 +40,9 @@ router.get("/my-donations", protect, getMyDonations);
 
 // 4) Admin sees all donations
 router.get("/all", protect, adminProtect, getAllDonations);
+
+
+router.get("/total", getTotalDonations);
+router.get("/top", getTopDonation);
 
 module.exports = router;

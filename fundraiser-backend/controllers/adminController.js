@@ -14,9 +14,10 @@ exports.getAdminDashboardStats = async (req, res) => {
     const pendingFundraisers = await Fundraiser.countDocuments({ status: "pending" });
     const rejectedFundraisers = await Fundraiser.countDocuments({ status: "rejected" });
 
-    const totalDonations = await Donation.aggregate([
+    const totalDonationsResult = await Donation.aggregate([
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
+    const totalDonations = totalDonationsResult.length > 0 ? totalDonationsResult[0].total : 0;
 
     const topDonors = await Donation.aggregate([
       { $group: { _id: "$donorId", totalDonated: { $sum: "$amount" } } },

@@ -115,6 +115,9 @@ const AdminDashboard = () => {
     totalDonations: 0,
     topDonors: [],
   });
+
+  const [totaldonations , settotaldonations]=useState(0)
+  const [topdonations , settopdonations]=useState({})
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true); // Added loading state
 
@@ -128,6 +131,19 @@ const AdminDashboard = () => {
           headers: { Authorization: `Bearer ${adminInfo.token}` },
         });
 
+        const responsetotal = await axios.get("http://localhost:5000/api/donations/total", {
+          headers: { Authorization: `Bearer ${adminInfo.token}` },
+        });
+
+        const responsetop = await axios.get("http://localhost:5000/api/donations/top", {
+          headers: { Authorization: `Bearer ${adminInfo.token}` },
+        });
+
+        console.log(responsetotal.data.totalDonations)
+        settotaldonations(responsetotal.data.totalDonations)
+        console.log(responsetop.data.topDonation.amount)
+        settopdonations(responsetop.data.topDonation)
+
         setStats(data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -140,13 +156,15 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
+  console.log(topdonations)
+
   const statCards = [
     { title: "Total Users", value: stats.totalUsers, color: "text-indigo-600", bg: "bg-indigo-50" },
     { title: "Total Fundraisers", value: stats.totalFundraisers, color: "text-purple-600", bg: "bg-purple-50" },
     { title: "Active Fundraisers", value: stats.activeFundraisers, color: "text-green-600", bg: "bg-green-50" },
     { title: "Pending Approvals", value: stats.pendingFundraisers, color: "text-yellow-600", bg: "bg-yellow-50" },
     { title: "Rejected Fundraisers", value: stats.rejectedFundraisers, color: "text-red-600", bg: "bg-red-50" },
-    { title: "Total Donations", value: `₹${stats.totalDonations.toLocaleString()}`, color: "text-blue-600", bg: "bg-blue-50" },
+    { title: "Total Donations", value: `₹${totaldonations.toLocaleString()}`, color: "text-blue-600", bg: "bg-blue-50" },
   ];
 
   return (
@@ -188,23 +206,16 @@ const AdminDashboard = () => {
             {/* Top Donors Section */}
             <div className="mt-8 bg-white p-6 rounded-xl shadow-md">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Top Donors</h2>
-              {stats.topDonors.length > 0 ? (
                 <ul className="space-y-3">
-                  {stats.topDonors.map((donor, index) => (
                     <li
-                      key={index}
                       className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      <span className="text-lg font-medium text-gray-700">{donor.name}</span>
+                      <span className="text-lg font-medium text-gray-700">{topdonations.donor.name}</span>
                       <span className="text-lg font-semibold text-blue-600">
-                        ₹{donor.totalDonated.toLocaleString()}
+                        ₹{topdonations.amount.toLocaleString()}
                       </span>
                     </li>
-                  ))}
                 </ul>
-              ) : (
-                <p className="text-gray-500 text-center">No donations yet.</p>
-              )}
             </div>
           </div>
         )}
